@@ -18,3 +18,5 @@ Here's how the algorithm works in more detail:
 KDE clustering is particularly useful for datasets with complex shapes and irregularities, as it does not make assumptions about the underlying distribution of the data. However, it can be computationally expensive for large datasets, and the choice of kernel function and bandwidth can significantly affect the results. Therefore, careful tuning of these parameters is necessary for optimal performance.
 
 With KDE we are using other clustering algorithms. The reason for this is that KDE clustering alone does not assign data points to specific clusters, but rather estimates the density function of the data. In order to obtain cluster assignments, we need to apply a clustering algorithm on top of the estimated densities.
+
+With bandwidth we smooth the data. The larger the bandwidth, the smoother the data. The smaller the bandwidth, the more local the clusters. The bandwidth parameter is a hyperparameter that needs to be tuned for optimal performance.
