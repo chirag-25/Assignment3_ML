@@ -57,7 +57,7 @@ st.write('Silhouette Score DBSCAN', metrics.silhouette_score(X, labels))
 
 
 
-KDE clustering
+# KDE clustering
 st.title('KDE Clustering Visualization')
 kde_model = KernelDensity(kernel=kernel_function, bandwidth=bandwidth).fit(X)
 log_dens = np.exp(kde_model.score_samples(X))
