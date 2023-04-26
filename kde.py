@@ -1,29 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.cluster import MeanShift, estimate_bandwidth
 from sklearn.datasets import make_blobs
-from sklearn.neighbors import KernelDensity
-from sklearn.cluster import MeanShift
 
-# generate sample data
-X, _ = make_blobs(n_samples=1000, centers=4, random_state=42)
+# Generate some sample data
+X, _ = make_blobs(n_samples=1000, centers=4, cluster_std=0.5, random_state=42)
 
-# compute kernel density estimate
-kde = KernelDensity(kernel='gaussian', bandwidth=0.5).fit(X)
-densities = np.exp(kde.score_samples(X))
+# Estimate the bandwidth parameter using a KDE
+bandwidth = estimate_bandwidth(X, quantile=0.2, n_samples=500)
 
-# cluster using mean-shift algorithm
-ms = MeanShift(bandwidth=1.0, bin_seeding=True)
+# Fit the mean shift algorithm with the estimated bandwidth
+ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
 ms.fit(X)
 
-# plot results
-fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+# Print the number of clusters and cluster centers
+labels = ms.labels_
+centers = ms.cluster_centers_
+n_clusters = len(np.unique(labels))
+print("Number of estimated clusters:", n_clusters)
+print("Cluster centers:", centers)
 
-# plot kernel density estimate
-scatter = ax[0].scatter(X[:, 0], X[:, 1], c=densities, cmap='viridis', s=10)
-ax[0].set_title('Kernel Density Estimate')
-
-# plot clusters
-ax[1].scatter(X[:, 0], X[:, 1], c=ms.labels_, cmap='viridis', s=10)
-ax[1].set_title('Clusters')
-plt.colorbar(scatter)
+# Plot the data points and cluster centers
+plt.scatter(X[:, 0], X[:, 1], c=labels)
+plt.scatter(centers[:, 0], centers[:, 1], marker='x', s=200, linewidths=3, color='r')
 plt.show()

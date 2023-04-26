@@ -1,6 +1,6 @@
 import streamlit as st
 from sklearn.datasets import make_blobs
-from sklearn.cluster import DBSCAN, MeanShift
+from sklearn.cluster import DBSCAN, MeanShift, estimate_bandwidth
 import matplotlib.pyplot as plt
 from scipy.spatial import Voronoi, voronoi_plot_2d
 from sklearn.neighbors import KernelDensity
@@ -12,7 +12,7 @@ with st.sidebar:
     st.write("Data Generation Parameters")
     n_centers = st.slider('n_centers', min_value=1, max_value=20, value=5, step=1)
     sample_count = st.slider('sample_count', min_value=100, max_value=5000, value=1000, step=100)
-    std_deviatoin = st.slider('std_deviatoin', min_value=0.1, max_value=1.0, value=0.5, step=0.1)
+    std_deviatoin = st.slider('std_deviatoin', min_value=0.1, max_value=2.0, value=0.5, step=0.1)
     st.write("DBSCAN Parameters")
     min_samples = st.slider('min_samples', min_value=1, max_value=10, value=5, step=1)
     epslon = st.slider('epslon', min_value=0.1, max_value=1.0, value=0.5, step=0.1)
@@ -42,9 +42,11 @@ st.pyplot(fig)
 
 # dbscan clustering
 st.title('DBSCAN Clustering Visualization')
+st.markdown("[Know more about DBSCAN clustering](https://github.com/chirag-25/Assignment3_ML/blob/main/dbscan.md)")
 dbscan = DBSCAN(eps=epslon, min_samples=min_samples)
 dbscan.fit(X)
 labels = dbscan.labels_
+# print(f'label dbscan: {labels}')
 n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 fig, ax = plt.subplots()
 voronoi_plot_2d(vor, ax=ax, show_points=False, show_vertices=False, line_colors='grey', line_width=1, line_alpha=0.2, point_size=2)
@@ -57,13 +59,15 @@ st.write('Silhouette Score DBSCAN', metrics.silhouette_score(X, labels))
 
 
 
-KDE clustering
+# KDE clustering
 st.title('KDE Clustering Visualization')
+st.markdown("[Know more about KDE clustering](https://github.com/chirag-25/Assignment3_ML/blob/main/kde.md)")
 kde_model = KernelDensity(kernel=kernel_function, bandwidth=bandwidth).fit(X)
-log_dens = np.exp(kde_model.score_samples(X))
+# log_dens = np.exp(kde_model.score_samples(X))
+# ms = MeanShift().fit(log_dens.reshape(-1, 1))
 ms = MeanShift(bandwidth=bandwidth).fit(kde_model.score_samples(X).reshape(-1, 1))
-# ms = MeanShift(bandwidth=bandwidth).fit(log_dens.reshape(-1, 1))
 labels_kde = ms.labels_
+# print(f'label_kde: {labels_kde}')
 fig, ax = plt.subplots()
 n_clusters_kde = len(set(labels_kde)) - (1 if -1 in labels_kde else 0)
 voronoi_plot_2d(vor, ax=ax, show_points=False, show_vertices=False, line_colors='grey', line_width=1, line_alpha=0.2, point_size=2)
@@ -72,8 +76,11 @@ ax.set_title(f'KDE\nNumber of clusters: {n_clusters_kde}')
 plt.colorbar(scatter_kde)
 # Display plot in Streamlit app
 st.pyplot(fig)
-st.write('Silhouette Score KDE', metrics.silhouette_score(X, labels_kde))
 
+try:
+    st.write('Silhouette Score KDE', metrics.silhouette_score(X, labels_kde))
+except: # n cluster == 1
+    st.write('Silhouette Score KDE', 0)
 #  adding the github link
 st.markdown("[Github Link](https://github.com/chirag-25/Assignment3_ML)")
 
